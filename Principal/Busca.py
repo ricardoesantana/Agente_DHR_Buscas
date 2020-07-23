@@ -1,6 +1,7 @@
 import random
 import time
 from Quadro import Quadro
+
 import sys
 from ctypes import c_int64
 
@@ -43,8 +44,9 @@ class Busca:
         self.fila = [self.agente]
         self.pilha = [self.agente] 
         self.prox = [self.agente]
+        
+        self.pontos = 0       
        
-        self.pontos = 0 
 
     def criar(self):
         index = c_int64(0)
@@ -87,9 +89,6 @@ class Busca:
             is_NV = q.estado == NV
             if(is_NV):
                 q.estado = estado
-                if(estado == COMIDA):
-                    self.PComidaX = x
-                    self.PComidaY = y
                 if(estado == OBSTACULO):
                     for vizinho in self.grid[x][y].vizinhos:
                         vizinho.vizinhos.remove(q)
@@ -98,8 +97,8 @@ class Busca:
                 if(estado == AGENTE):
                     self.agente= q
                    
-                added = added + 1        
-                
+                added = added + 1
+
     def largura(self):
         if(self.fila):
             current = self.fila.pop(0)
@@ -152,7 +151,6 @@ class Busca:
             if(current.vizinhos[miniI].estado == COMIDA):
                 self.comida = current
                 self.fila = []
-                self.pontos += 1
                 
             if(current.vizinhos[miniI].estado == NV):
                 self.fila.append(current.vizinhos[miniI])
@@ -168,13 +166,11 @@ class Busca:
                 if(q.estado == COMIDA):
                     self.estado = current
                     self.prox = []
-                    self.pontos += 1
                     break
                 if(q.estado == NV):
                     self.prox.append(q)
-                    q.estado = VISITADO
-                    q.pai = current
-        
+                    node.estado = VISITADO
+                    node.pai = current
                     
     def minCusto(self, vizinhos, pai):
         minValor = sys.maxint
@@ -191,7 +187,7 @@ class Busca:
         minValor = sys.maxint
         miniI = 0 
         for id, n in enumerate(quadros):
-            if(self.relativo(n) < minValor):
+            if(self.relativeCost(n) < minValor):
                 minValor = self.relativeCost(n)
                 miniI = id 
         return(miniI)
@@ -201,13 +197,13 @@ class Busca:
         miniI = 0 
         cost = 0
         for id, n in enumerate(quadros):
-            cost = self.relativo(n) + dist(self.PComidaX, self.PComidaY, n.x, n.y)
-            if(cost < minValor):
+            cost = self.relativeCost(n) + dist(self.PComidaX, self.PComidaY, n.x, n.y)
+            if(cost < minValue):
                 minValor = cost
                 miniI = id 
         return(miniI)
 
-    def relativo(self, current):
+    def relativeCost(self, current):
        tempCurrent = current 
        cost = 0
        while(tempCurrent.indice != self.agente.indice):
@@ -240,7 +236,7 @@ class Busca:
         self.add(COMIDA)
 
     def display(self):
-       
+        for x in range(10):
             with pushMatrix():
                 #stroke (148,148,148)
                 strokeWeight(5)
